@@ -81,7 +81,7 @@ project(httplib
 
 # Change as needed to set an OpenSSL minimum version.
 # This is used in the installed Cmake config file.
-set(_HTTPLIB_OPENSSL_MIN_VER "3.0.0")
+set(_HTTPLIB_OPENSSL_MIN_VER "1.1.1")
 
 # Lets you disable C++ exception during CMake configure time.
 # The value is used in the install CMake config file.
