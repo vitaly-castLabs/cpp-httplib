@@ -1,3 +1,5 @@
+This is a fork bringing back OpenSSL 1.1.x support (and BoringSSL by extension)
+
 cpp-httplib
 ===========
 
@@ -54,7 +56,7 @@ SSL Support
 
 SSL support is available with `CPPHTTPLIB_OPENSSL_SUPPORT`. `libssl` and `libcrypto` should be linked.
 
-NOTE: cpp-httplib currently supports only version 1.1.1 and 3.0.
+NOTE: cpp-httplib currently supports OpenSSL 1.1.x and 3.x and BoringSSL.
 
 > [!TIP]
 > For macOS: cpp-httplib now can use system certs with `CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN`. `CoreFoundation` and `Security` should be linked with `-framework`.
