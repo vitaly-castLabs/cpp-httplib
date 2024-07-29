@@ -2893,9 +2893,7 @@ inline bool mmap::is_open() const { return addr_ != nullptr; }
 
 inline size_t mmap::size() const { return size_; }
 
-inline const char *mmap::data() const {
-  return static_cast<const char *>(addr_);
-}
+inline const char *mmap::data() const { return (const char *)addr_; }
 
 inline void mmap::close() {
 #if defined(_WIN32)
@@ -9077,11 +9075,11 @@ inline bool SSLClient::initialize_ssl(Socket &socket, Error &error) {
         return true;
       },
       [&](SSL *ssl2) {
-        // NOTE: Direct call instead of using the OpenSSL macro to suppress
-        // -Wold-style-cast warning
-        // SSL_set_tlsext_host_name(ssl2, host_.c_str());
-        SSL_ctrl(ssl2, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name,
-                 static_cast<void *>(const_cast<char *>(host_.c_str())));
+        // NOTE: With -Wold-style-cast, this can produce a warning, since
+        //  SSL_set_tlsext_host_name is a macro (in OpenSSL), which contains
+        //  an old style cast. Short of doing compiler specific pragma's
+        //  here, we can't get rid of this warning. :'(
+        SSL_set_tlsext_host_name(ssl2, host_.c_str());
         return true;
       });
 
