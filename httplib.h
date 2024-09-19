@@ -1959,6 +1959,7 @@ inline ssize_t Stream::write_format(const char *fmt, const Args &...args) {
 }
 
 inline void default_socket_options(socket_t sock) {
+#ifndef CPPHTTPLIB_NO_PORT_REUSE
   int yes = 1;
 #ifdef _WIN32
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
@@ -1972,6 +1973,7 @@ inline void default_socket_options(socket_t sock) {
 #else
   setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
              reinterpret_cast<const void *>(&yes), sizeof(yes));
+#endif
 #endif
 #endif
 }
