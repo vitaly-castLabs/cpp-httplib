@@ -597,26 +597,24 @@ struct Response {
   std::string get_header_value(const std::string &key, size_t id = 0) const;
   uint64_t get_header_value_u64(const std::string &key, size_t id = 0) const;
   size_t get_header_value_count(const std::string &key) const;
-  void set_header(const std::string &key, const std::string &val);
+  Response& set_header(const std::string &key, const std::string &val);
 
-  void set_redirect(const std::string &url, int status = StatusCode::Found_302);
-  void set_content(const char *s, size_t n, const std::string &content_type);
-  void set_content(const std::string &s, const std::string &content_type);
-  void set_content(std::string &&s, const std::string &content_type);
-  void set_status_content(int st, const std::string &content, const std::string &content_type) {
-    status = st;
-    set_content(content, content_type);
-  }
+  Response& set_redirect(const std::string &url, int status = StatusCode::Found_302);
 
-  void set_content_provider(
+  Response& set_status(int stat);
+  Response& set_content(const char *s, size_t n, const std::string &content_type);
+  Response& set_content(const std::string &s, const std::string &content_type);
+  Response& set_content(std::string &&s, const std::string &content_type);
+
+  Response& set_content_provider(
       size_t length, const std::string &content_type, ContentProvider provider,
       ContentProviderResourceReleaser resource_releaser = nullptr);
 
-  void set_content_provider(
+  Response& set_content_provider(
       const std::string &content_type, ContentProviderWithoutLength provider,
       ContentProviderResourceReleaser resource_releaser = nullptr);
 
-  void set_chunked_content_provider(
+  Response& set_chunked_content_provider(
       const std::string &content_type, ContentProviderWithoutLength provider,
       ContentProviderResourceReleaser resource_releaser = nullptr);
 
@@ -5537,14 +5535,15 @@ inline size_t Response::get_header_value_count(const std::string &key) const {
   return static_cast<size_t>(std::distance(r.first, r.second));
 }
 
-inline void Response::set_header(const std::string &key,
-                                 const std::string &val) {
+inline Response& Response::set_header(const std::string &key,
+                                      const std::string &val) {
   if (!detail::has_crlf(key) && !detail::has_crlf(val)) {
     headers.emplace(key, val);
   }
+  return *this;
 }
 
-inline void Response::set_redirect(const std::string &url, int stat) {
+inline Response& Response::set_redirect(const std::string &url, int stat) {
   if (!detail::has_crlf(url)) {
     set_header("Location", url);
     if (300 <= stat && stat < 400) {
@@ -5553,32 +5552,41 @@ inline void Response::set_redirect(const std::string &url, int stat) {
       this->status = StatusCode::Found_302;
     }
   }
+  return *this;
 }
 
-inline void Response::set_content(const char *s, size_t n,
-                                  const std::string &content_type) {
+inline Response& Response::set_status(int stat) {
+  this->status = stat;
+  return *this;
+}
+
+inline Response& Response::set_content(const char *s, size_t n,
+                                       const std::string &content_type) {
   body.assign(s, n);
 
   auto rng = headers.equal_range("Content-Type");
   headers.erase(rng.first, rng.second);
   set_header("Content-Type", content_type);
+  return *this;
 }
 
-inline void Response::set_content(const std::string &s,
+inline Response& Response::set_content(const std::string &s,
                                   const std::string &content_type) {
   set_content(s.data(), s.size(), content_type);
+  return *this;
 }
 
-inline void Response::set_content(std::string &&s,
+inline Response& Response::set_content(std::string &&s,
                                   const std::string &content_type) {
   body = std::move(s);
 
   auto rng = headers.equal_range("Content-Type");
   headers.erase(rng.first, rng.second);
   set_header("Content-Type", content_type);
+  return *this;
 }
 
-inline void Response::set_content_provider(
+inline Response& Response::set_content_provider(
     size_t in_length, const std::string &content_type, ContentProvider provider,
     ContentProviderResourceReleaser resource_releaser) {
   set_header("Content-Type", content_type);
@@ -5586,9 +5594,10 @@ inline void Response::set_content_provider(
   if (in_length > 0) { content_provider_ = std::move(provider); }
   content_provider_resource_releaser_ = std::move(resource_releaser);
   is_chunked_content_provider_ = false;
+  return *this;
 }
 
-inline void Response::set_content_provider(
+inline Response& Response::set_content_provider(
     const std::string &content_type, ContentProviderWithoutLength provider,
     ContentProviderResourceReleaser resource_releaser) {
   set_header("Content-Type", content_type);
@@ -5596,9 +5605,10 @@ inline void Response::set_content_provider(
   content_provider_ = detail::ContentProviderAdapter(std::move(provider));
   content_provider_resource_releaser_ = std::move(resource_releaser);
   is_chunked_content_provider_ = false;
+  return *this;
 }
 
-inline void Response::set_chunked_content_provider(
+inline Response& Response::set_chunked_content_provider(
     const std::string &content_type, ContentProviderWithoutLength provider,
     ContentProviderResourceReleaser resource_releaser) {
   set_header("Content-Type", content_type);
@@ -5606,6 +5616,7 @@ inline void Response::set_chunked_content_provider(
   content_provider_ = detail::ContentProviderAdapter(std::move(provider));
   content_provider_resource_releaser_ = std::move(resource_releaser);
   is_chunked_content_provider_ = true;
+  return *this;
 }
 
 // Result implementation
