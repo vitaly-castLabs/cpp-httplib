@@ -603,6 +603,10 @@ struct Response {
   void set_content(const char *s, size_t n, const std::string &content_type);
   void set_content(const std::string &s, const std::string &content_type);
   void set_content(std::string &&s, const std::string &content_type);
+  void set_status_content(int st, const std::string &content, const std::string &content_type) {
+    status = st;
+    set_content(content, content_type);
+  }
 
   void set_content_provider(
       size_t length, const std::string &content_type, ContentProvider provider,
